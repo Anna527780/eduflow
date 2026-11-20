@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f5f7; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .login-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); width: 400px; }
+    h2 { text-align: center; margin-top: 0; }
+    label { font-weight: bold; display: block; margin-top: 12px; }
+    input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    button { width: 100%; margin-top: 20px; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
+    button:hover { background: #1558b0; }
+    .alert { padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; background: #ffcdd2; color: #b71c1c; }
+    .alert ul { margin: 5px 0 0 18px; padding: 0; }
+    .link { text-align: center; margin-top: 15px; font-size: 14px; }
+    .link a { color: #1a73e8; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>Авторизация</h2>
+
+<% if (typeof success !== 'undefined' && success === 'registered') { %>
+  <div class="alert" style="background:#c8e6c9; color:#2e7d32;">
+    <strong>✅ Регистрация прошла успешно!</strong><br>
+    Теперь войдите, используя свой email и пароль.
+  </div>
+<% } %>
+
+    <% if (typeof errors !== 'undefined' && errors && errors.length > 0) { %>
+      <div class="alert">
+        <strong>Ошибки:</strong>
+        <ul>
+          <% errors.forEach(err => { %>
+            <li><%= err %></li>
+          <% }); %>
+        </ul>
+      </div>
+    <% } %>
+
+    <form method="POST" action="/login">
+      <label>Email</label>
+      <input type="email" name="email" maxlength="254" required
+             placeholder="admin@example.com"
+             value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>">
+
+      <label>Пароль</label>
+      <input type="password" name="password" maxlength="30" minlength="6" required>
+
+      <button type="submit">Войти</button>
+    </form>
+
+    <div class="link">
+      Нет аккаунта? <a href="/register">Зарегистрироваться</a>
+    </div>
+  </div>
+</body>
+</html>

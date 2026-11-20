@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f5f7; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px 0; }
+    .box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); width: 420px; }
+    h2 { text-align: center; margin-top: 0; }
+    label { font-weight: bold; display: block; margin-top: 12px; }
+    input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    input.invalid { border-color: #e53935; background: #ffebee; }
+    button { width: 100%; margin-top: 20px; padding: 12px; background: #43a047; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
+    button:hover { background: #2e7d32; }
+    .alert { padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; background: #ffcdd2; color: #b71c1c; }
+    .alert ul { margin: 5px 0 0 18px; padding: 0; }
+    .link { text-align: center; margin-top: 15px; font-size: 14px; }
+    .link a { color: #1a73e8; text-decoration: none; }
+    .hint { font-size: 12px; color: #777; margin-top: 4px; }
+    .error { font-size: 12px; color: #c62828; margin-top: 4px; min-height: 14px; }
+    .counter { font-size: 11px; color: #999; text-align: right; margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Регистрация</h2>
+
+    <% if (typeof errors !== 'undefined' && errors && errors.length > 0) { %>
+      <div class="alert">
+        <strong>Ошибки:</strong>
+        <ul>
+          <% errors.forEach(err => { %>
+            <li><%= err %></li>
+          <% }); %>
+        </ul>
+      </div>
+    <% } %>
+
+    <form method="POST" action="/register" id="regForm" novalidate>
+
+      <label>Имя</label>
+      <input type="text" name="name" id="name" maxlength="50" minlength="2"
+             pattern="[A-Za-zА-Яа-яЁё\s\-]+"
+             placeholder="Ваше имя"
+             value="<%= typeof formData !== 'undefined' && formData.name ? formData.name : '' %>">
+      <div class="hint">От 2 до 50 символов. Только буквы, пробелы, дефисы.</div>
+      <div class="counter" id="nameCounter">0 / 50</div>
+      <div class="error" id="nameError"></div>
+
+      <label>Email</label>
+      <input type="email" name="email" id="email" maxlength="254"
+             placeholder="user@example.com"
+             value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>">
+      <div class="hint">Формат: имя@домен.зона (например, user@example.com). От 6 до 254 символов.</div>
+      <div class="counter" id="emailCounter">0 / 254</div>
+      <div class="error" id="emailError"></div>
+
+      <label>Пароль</label>
+      <input type="password" name="password" id="password" maxlength="30" minlength="6">
+      <div class="hint">От 6 до 30 символов. Обязательно хотя бы одна буква и одна цифра.</div>
+      <div class="counter" id="passwordCounter">0 / 30</div>
+      <div class="error" id="passwordError"></div>
+
+      <button type="submit">Создать аккаунт</button>
+    </form>
+
+    <div class="link">
+      Уже есть аккаунт? <a href="/login">Войти</a>
+    </div>
+  </div>
+
+  <script>
+    function validateEmail(value) {
+      if (!value.trim()) return 'Введите email';
+      if (value.length < 6) return 'Email слишком короткий (минимум 6 символов)';
+      if (value.length > 254) return 'Email слишком длинный (максимум 254 символа)';
+      const re = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,24}$/;
+      if (!re.test(value)) return 'Некорректный формат email. Пример: user@example.com';
+      if (value.includes('..')) return 'Email не может содержать две точки подряд';
+      return '';
+    }
+
+    function validatePassword(value) {
+      if (!value) return 'Введите пароль';
+      if (value.length < 6) return 'Пароль должен содержать минимум 6 символов';
+      if (value.length > 30) return 'Пароль не должен превышать 30 символов';
+      if (!/[A-Za-zА-Яа-я]/.test(value)) return 'Пароль должен содержать хотя бы одну букву';
+      if (!/\d/.test(value)) return 'Пароль должен содержать хотя бы одну цифру';
+      return '';
+    }
+
+    function validateName(value) {
+      if (!value.trim()) return '';
+      if (value.trim().length < 2) return 'Имя должно содержать минимум 2 символа';
+      if (value.length > 50) return 'Имя не должно превышать 50 символов';
+      const re = /^[A-Za-zА-Яа-яЁё\s\-]+$/;
+      if (!re.test(value)) return 'Имя может содержать только буквы, пробелы и дефисы';
+      return '';
+    }
+
+    function updateCounter(inputEl, counterEl) {
+      const max = inputEl.maxLength;
+      counterEl.textContent = inputEl.value.length + ' / ' + max;
+      counterEl.style.color = inputEl.value.length >= max ? '#c62828' : '#999';
+    }
+
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+
+    nameInput.addEventListener('input', () => {
+      updateCounter(nameInput, document.getElementById('nameCounter'));
+      const err = validateName(nameInput.value);
+      document.getElementById('nameError').textContent = err;
+      nameInput.classList.toggle('invalid', !!err);
+    });
+
+    emailInput.addEventListener('input', () => {
+      updateCounter(emailInput, document.getElementById('emailCounter'));
+      const err = validateEmail(emailInput.value);
+      document.getElementById('emailError').textContent = err;
+      emailInput.classList.toggle('invalid', !!err);
+    });
+
+    passwordInput.addEventListener('input', () => {
+      updateCounter(passwordInput, document.getElementById('passwordCounter'));
+      const err = validatePassword(passwordInput.value);
+      document.getElementById('passwordError').textContent = err;
+      passwordInput.classList.toggle('invalid', !!err);
+    });
+
+    [[nameInput, 'nameCounter'], [emailInput, 'emailCounter'], [passwordInput, 'passwordCounter']]
+      .forEach(([inp, id]) => updateCounter(inp, document.getElementById(id)));
+
+    document.getElementById('regForm').addEventListener('submit', (e) => {
+      const e1 = validateName(nameInput.value);
+      const e2 = validateEmail(emailInput.value);
+      const e3 = validatePassword(passwordInput.value);
+      if (e1 || e2 || e3) {
+        e.preventDefault();
+        document.getElementById('nameError').textContent = e1;
+        document.getElementById('emailError').textContent = e2;
+        document.getElementById('passwordError').textContent = e3;
+      }
+    });
+  </script>
+</body>
+</html>

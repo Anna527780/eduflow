@@ -1,0 +1,158 @@
+<%- include('partials/header') %>
+
+<h2>Добавить новый курс</h2>
+
+<% if (typeof errors !== 'undefined' && errors && errors.length > 0) { %>
+  <div class="card" style="background:#ffcdd2; color:#b71c1c;">
+    <strong>Ошибки:</strong>
+    <ul>
+      <% errors.forEach(err => { %>
+        <li><%= err %></li>
+      <% }); %>
+    </ul>
+  </div>
+<% } %>
+
+<form method="POST" action="/add" class="card" id="addForm" novalidate>
+
+  <label>Название курса</label>
+  <input type="text" name="title" id="title" required minlength="3" maxlength="150"
+         placeholder="Например: Основы Python"
+         value="<%= typeof formData !== 'undefined' && formData.title ? formData.title : '' %>">
+  <div style="font-size:12px; color:#777; margin-top:4px;">От 3 до 150 символов. Разрешены буквы, цифры, пробелы и знаки .,:;!?()-</div>
+  <div style="font-size:11px; color:#999; text-align:right; margin-top:2px;" id="titleCounter">0 / 150</div>
+  <div style="font-size:12px; color:#c62828; margin-top:2px; min-height:14px;" id="titleError"></div>
+
+  <label>Категория</label>
+  <select name="category" id="category" required>
+    <option value="">— выберите категорию —</option>
+    <%
+      const categories = [
+        'Программирование',
+        'Backend',
+        'Frontend',
+        'Базы данных',
+        'DevOps',
+        'Мобильная разработка',
+        'Data Science',
+        'Дизайн',
+        'Маркетинг',
+        'Аналитика'
+      ];
+      const selectedCat = (typeof formData !== 'undefined' && formData.category) ? formData.category : '';
+    %>
+    <% categories.forEach(cat => { %>
+      <option value="<%= cat %>" <%= selectedCat === cat ? 'selected' : '' %>><%= cat %></option>
+    <% }); %>
+  </select>
+  <div style="font-size:12px; color:#777; margin-top:4px;">Выберите одну из предложенных категорий</div>
+  <div style="font-size:12px; color:#c62828; margin-top:2px; min-height:14px;" id="categoryError"></div>
+
+  <label>Длительность (в часах)</label>
+  <input type="number" name="durationHours" id="durationHours" min="1" max="500" required
+         placeholder="Например: 20"
+         value="<%= typeof formData !== 'undefined' && formData.durationHours ? formData.durationHours : '' %>">
+  <div style="font-size:12px; color:#777; margin-top:4px;">Целое число от 1 до 500</div>
+  <div style="font-size:12px; color:#c62828; margin-top:2px; min-height:14px;" id="durationError"></div>
+
+  <label>Уровень</label>
+  <select name="level" id="level">
+    <% const levels = ['Начальный', 'Средний', 'Продвинутый'];
+       const selectedLvl = (typeof formData !== 'undefined' && formData.level) ? formData.level : 'Начальный';
+    %>
+    <% levels.forEach(lvl => { %>
+      <option value="<%= lvl %>" <%= selectedLvl === lvl ? 'selected' : '' %>><%= lvl %></option>
+    <% }); %>
+  </select>
+
+  <label>Описание</label>
+  <textarea name="description" id="description" rows="4" maxlength="1000"
+    placeholder="Краткое описание курса"
+    ><%= typeof formData !== 'undefined' && formData.description ? formData.description : '' %></textarea>
+  <div style="font-size:12px; color:#777; margin-top:4px;">От 5 до 1000 символов (необязательно)</div>
+  <div style="font-size:11px; color:#999; text-align:right; margin-top:2px;" id="descCounter">0 / 1000</div>
+  <div style="font-size:12px; color:#c62828; margin-top:2px; min-height:14px;" id="descError"></div>
+
+  <button class="btn" type="submit">Сохранить курс</button>
+</form>
+
+<script>
+  const titleInput = document.getElementById('title');
+  const categoryInput = document.getElementById('category');
+  const durationInput = document.getElementById('durationHours');
+  const descInput = document.getElementById('description');
+
+  function updateCounter(inputEl, counterId) {
+    const el = document.getElementById(counterId);
+    const max = inputEl.maxLength > 0 ? inputEl.maxLength : 1000;
+    el.textContent = inputEl.value.length + ' / ' + max;
+    el.style.color = inputEl.value.length >= max ? '#c62828' : '#999';
+  }
+
+  function validateTitle(v) {
+    if (!v.trim()) return 'Введите название курса';
+    if (v.trim().length < 3) return 'Название должно содержать минимум 3 символа';
+    if (v.length > 150) return 'Название не должно превышать 150 символов';
+    const re = /^[A-Za-zА-Яа-яЁё0-9\s\-.,:;!?()]+$/;
+    if (!re.test(v)) return 'Название содержит недопустимые символы';
+    return '';
+  }
+
+  function validateCategory(v) {
+    if (!v) return 'Выберите категорию из списка';
+    return '';
+  }
+
+  function validateDuration(v) {
+    if (!v) return 'Введите длительность';
+    const n = Number(v);
+    if (isNaN(n)) return 'Длительность должна быть числом';
+    if (!Number.isInteger(n)) return 'Длительность должна быть целым числом';
+    if (n < 1) return 'Длительность не может быть меньше 1';
+    if (n > 500) return 'Длительность не может быть больше 500';
+    return '';
+  }
+
+  function validateDesc(v) {
+    if (!v.trim()) return '';
+    if (v.trim().length < 5) return 'Описание должно содержать минимум 5 символов';
+    if (v.length > 1000) return 'Описание не должно превышать 1000 символов';
+    return '';
+  }
+
+  titleInput.addEventListener('input', () => {
+    updateCounter(titleInput, 'titleCounter');
+    document.getElementById('titleError').textContent = validateTitle(titleInput.value);
+  });
+  categoryInput.addEventListener('change', () => {
+    document.getElementById('categoryError').textContent = validateCategory(categoryInput.value);
+  });
+  durationInput.addEventListener('input', () => {
+    document.getElementById('durationError').textContent = validateDuration(durationInput.value);
+  });
+  descInput.addEventListener('input', () => {
+    updateCounter(descInput, 'descCounter');
+    document.getElementById('descError').textContent = validateDesc(descInput.value);
+  });
+
+  [ [titleInput, 'titleCounter'], [descInput, 'descCounter'] ]
+    .forEach(([inp, id]) => updateCounter(inp, id));
+
+  document.getElementById('addForm').addEventListener('submit', (e) => {
+    const e1 = validateTitle(titleInput.value);
+    const e2 = validateCategory(categoryInput.value);
+    const e3 = validateDuration(durationInput.value);
+    const e4 = validateDesc(descInput.value);
+
+    document.getElementById('titleError').textContent = e1;
+    document.getElementById('categoryError').textContent = e2;
+    document.getElementById('durationError').textContent = e3;
+    document.getElementById('descError').textContent = e4;
+
+    if (e1 || e2 || e3 || e4) {
+      e.preventDefault();
+    }
+  });
+</script>
+
+<%- include('partials/footer') %>

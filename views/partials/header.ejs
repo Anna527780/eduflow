@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f4f5f7; }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #4b2e83;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+    }
+    header a { color: white; text-decoration: none; margin-right: 15px; }
+    .container { max-width: 900px; margin: 30px auto; padding: 0 15px; }
+    .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
+    .card h3 { margin-top: 0; }
+    .btn { display: inline-block; background: #6a3fb5; color: white; padding: 8px 14px; border-radius: 5px; text-decoration: none; border: none; cursor: pointer; }
+    .btn:hover { background: #552f96; }
+    input, textarea, select { width: 100%; padding: 8px; margin: 5px 0 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    label { font-weight: bold; }
+  </style>
+</head>
+<body>
+<header>
+  <div>
+    <a href="/">Главная</a>
+    <a href="/add">Добавить курс</a>
+  </div>
+  <div>
+    Пользователь: <%= user.name %>
+    <% if (user.role === 'guest') { %>
+      | <a href="/login">Войти</a>
+      | <a href="/register">Регистрация</a>
+    <% } else { %>
+      | <a href="/">Выйти</a>
+    <% } %>
+  </div>
+</header>
+<div class="container">
+  <% if (typeof success !== 'undefined' && success === 'login') { %>
+  <div style="background:#c8e6c9; color:#2e7d32; padding:12px 20px; border-radius:6px; margin-bottom:20px;">
+    <strong>Вы успешно вошли в систему!</strong> Добро пожаловать, <%= user.name %>.
+  </div>
+<% } %>
